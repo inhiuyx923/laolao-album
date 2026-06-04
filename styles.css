@@ -382,8 +382,15 @@ button {
 }
 
 .gallery.waterfall-view {
-  columns: 1;
-  column-gap: 18px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+.waterfall-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .gallery.grid-view {
@@ -394,9 +401,8 @@ button {
 
 .memory-card {
   width: 100%;
-  display: inline-block;
-  break-inside: avoid;
-  margin: 0 0 18px;
+  display: block;
+  margin: 0;
   overflow: hidden;
   background: #fff;
   border: 1px solid rgba(229, 231, 235, 0.9);
@@ -1287,7 +1293,7 @@ button {
 
 @media (min-width: 640px) {
   .gallery.waterfall-view {
-    columns: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .gallery.grid-view {
@@ -1298,7 +1304,7 @@ button {
 
 @media (min-width: 1024px) {
   .gallery.waterfall-view {
-    columns: 3;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .gallery.grid-view {

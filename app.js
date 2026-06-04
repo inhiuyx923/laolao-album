@@ -3,7 +3,7 @@ const state = {
   baseMemories: [],
   order: [],
   reverseOrder: [],
-  sortMode: "reverse",
+  sortMode: "chronological",
   viewMode: "waterfall",
   selectedYears: new Set(),
   selectedMembers: new Set(),
@@ -505,6 +505,25 @@ function renderGallery() {
       <section class="empty-state">
         <p>${state.memories.length === 0 ? "还没有添加记忆" : "没有符合筛选条件的记忆"}</p>
         <a class="primary-action" href="#admin">开始上传</a>
+      </section>
+    `;
+  }
+
+  if (state.viewMode === "waterfall") {
+    const columnCount = window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1;
+    const columns = Array.from({ length: columnCount }, () => []);
+    memories.forEach((memory, index) => {
+      columns[index % columnCount].push(memory);
+    });
+    return `
+      <section class="content">
+        <div class="gallery waterfall-view">
+          ${columns.map((column) => `
+            <div class="waterfall-column">
+              ${column.map(renderCard).join("")}
+            </div>
+          `).join("")}
+        </div>
       </section>
     `;
   }
@@ -1194,6 +1213,12 @@ document.addEventListener("keydown", (event) => {
 });
 
 window.addEventListener("hashchange", render);
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  if (state.viewMode !== "waterfall") return;
+  window.clearTimeout(resizeTimer);
+  resizeTimer = window.setTimeout(render, 120);
+});
 
 async function init() {
   try {

@@ -3,7 +3,7 @@ const state = {
   baseMemories: [],
   order: [],
   reverseOrder: [],
-  sortMode: "chronological",
+  sortMode: "reverse",
   viewMode: "waterfall",
   selectedYears: new Set(),
   selectedMembers: new Set(),

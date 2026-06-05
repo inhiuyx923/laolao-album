@@ -194,14 +194,14 @@ button {
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  width: min(320px, calc(100vw - 32px));
-  max-height: 420px;
-  overflow: auto;
+  width: min(224px, calc(100vw - 32px));
+  max-height: 450px;
+  overflow: hidden;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: var(--shadow);
-  padding: 14px;
+  padding: 0;
   display: none;
   z-index: 30;
 }
@@ -210,8 +210,14 @@ button {
   display: block;
 }
 
+.filter-panel[data-panel-body="members"] {
+  width: min(256px, calc(100vw - 32px));
+}
+
 .filter-panel h3 {
-  margin: 0 0 12px;
+  margin: 0;
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
   font-size: 16px;
   font-weight: 500;
 }
@@ -219,6 +225,9 @@ button {
 .filter-list {
   display: grid;
   gap: 2px;
+  max-height: 330px;
+  overflow-y: auto;
+  padding: 12px;
 }
 
 .filter-option {
@@ -265,9 +274,10 @@ button {
 }
 
 .filter-footer {
-  margin: 12px -14px -14px;
+  margin: 0;
   padding: 12px;
   border-top: 1px solid var(--line);
+  background: #fff;
 }
 
 .filter-done {
@@ -572,7 +582,7 @@ button {
 
 .modal-panel {
   position: relative;
-  width: min(1120px, calc(100vw - 28px));
+  width: min(880px, calc(100vw - 28px));
   max-height: calc(100vh - 28px);
   margin: 14px auto;
   background: #fff;
@@ -655,6 +665,13 @@ button {
   box-shadow: 0 0 0 1px var(--line);
 }
 
+.modal-media video {
+  width: 100%;
+  height: min(72vh, 560px);
+  object-fit: cover;
+  background: #000;
+}
+
 .modal-bottom-nav {
   display: flex;
   justify-content: space-between;
@@ -681,7 +698,7 @@ button {
 
 .detail-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   margin-top: 18px;
 }
@@ -856,6 +873,14 @@ button {
   border: 0;
   background: transparent;
   color: inherit;
+}
+
+.edit-selected-members {
+  margin-top: 10px;
+}
+
+.edit-selected-members .selected-member-remove {
+  display: none;
 }
 
 .member-picker-wrap {
@@ -1155,6 +1180,12 @@ button {
 
 .danger-icon {
   color: #ef4444;
+}
+
+.danger-icon .ui-icon,
+.admin-item-actions button[title="删除"] .ui-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .edit-overlay {

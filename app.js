@@ -343,7 +343,14 @@ function availableMembers() {
       members.add(member);
     }
   }
-  return [...members].sort((left, right) => left.localeCompare(right, "zh-CN"));
+  return [...members].sort((left, right) => {
+    const leftIndex = MEMBER_ORDER.indexOf(left);
+    const rightIndex = MEMBER_ORDER.indexOf(right);
+    if (leftIndex !== -1 && rightIndex !== -1) return leftIndex - rightIndex;
+    if (leftIndex !== -1) return -1;
+    if (rightIndex !== -1) return 1;
+    return left.localeCompare(right, "zh-CN");
+  });
 }
 
 function icon(name) {
@@ -361,8 +368,15 @@ function icon(name) {
     pin: '<svg class="ui-icon small" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
     edit: '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
     download: '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>',
+    refresh: '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 16v5h5M3 12a9 9 0 0 1 15-6.7L21 8M21 8V3h-5"/></svg>',
+    check: '<svg class="ui-icon small" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
+    trash: '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>',
   };
   return icons[name] || "";
+}
+
+function homeHref() {
+  return location.pathname.endsWith("/admin") ? "./" : "#home";
 }
 
 function renderHeader() {
@@ -374,7 +388,7 @@ function renderHeader() {
             <div class="brand-avatar"><img src="assets/avatar.jpeg" alt="姥姥"></div>
             <h1>时光里的温暖</h1>
           </div>
-          <a class="admin-link" href="#admin" title="管理">
+          <a class="admin-link" href="admin" title="管理">
             ${icon("manage")}
             <span class="admin-text">管理</span>
           </a>
@@ -504,7 +518,7 @@ function renderGallery() {
     return `
       <section class="empty-state">
         <p>${state.memories.length === 0 ? "还没有添加记忆" : "没有符合筛选条件的记忆"}</p>
-        <a class="primary-action" href="#admin">开始上传</a>
+        <a class="primary-action" href="admin">开始上传</a>
       </section>
     `;
   }
@@ -570,7 +584,7 @@ function renderModal() {
         </div>
         <div class="modal-media">
           ${memory.type === "video"
-            ? `<video src="${escapeHtml(memory.mediaUrl)}" poster="${escapeHtml(memory.thumbnailUrl || "")}" controls playsinline></video>`
+            ? `<video class="modal-video" src="${escapeHtml(memory.mediaUrl)}" poster="${escapeHtml(memory.thumbnailUrl || "")}" preload="metadata" playsinline data-action="toggle-video-play"></video>`
             : `<img src="${escapeHtml(memory.mediaUrl)}" alt="${escapeHtml(memory.description)}">`}
         </div>
         <div class="modal-bottom-nav">
@@ -587,10 +601,6 @@ function renderModal() {
             <div class="detail-box">
               <div class="detail-label">地点</div>
               <div class="detail-value">${escapeHtml(memory.location)}</div>
-            </div>
-            <div class="detail-box">
-              <div class="detail-label">相关成员</div>
-              <div class="detail-value">${escapeHtml((memory.members || []).join("、") || "未标记")}</div>
             </div>
           </div>
         </div>
@@ -614,11 +624,11 @@ function renderAdminPage() {
 function renderAdminTopbar() {
   return `
     <div class="admin-topbar">
-      <a class="admin-back" href="#home">${icon("back")} 返回</a>
+      <a class="admin-back" href="${homeHref()}">${icon("back")} 返回</a>
       <div class="admin-actions">
         <button class="admin-primary teal" type="button" data-action="export-admin" title="导出Excel检查排序">${icon("download")} 导出Excel</button>
-        <button class="admin-primary" type="button" data-action="fix-sort" title="修复所有照片的排序">↻ 修复排序</button>
-        <span class="server-status">✓ 服务器连接正常</span>
+        <button class="admin-primary" type="button" data-action="fix-sort" title="修复所有照片的排序">${icon("refresh")} 修复排序</button>
+        <span class="server-status">${icon("check")} 服务器连接正常</span>
       </div>
     </div>
   `;
@@ -722,6 +732,18 @@ function syncChangeTitle(change) {
 function renderSelectedMembers(members, context) {
   const sorted = sortMembersByOriginalOrder(members || []);
   if (!sorted.length) return "";
+  if (context === "edit") {
+    return `
+      <div class="selected-members edit-selected-members">
+        ${sorted.map((member) => `
+          <span class="selected-member">
+            ${escapeHtml(member)}
+            <button class="selected-member-remove" type="button" data-action="remove-member" data-context="${context}" data-member="${escapeHtml(member)}" title="移除" aria-label="移除 ${escapeHtml(member)}">×</button>
+          </span>
+        `).join("")}
+      </div>
+    `;
+  }
   return `
     <div class="form-row selected-members-row">
       <label>已选成员:</label>
@@ -729,7 +751,7 @@ function renderSelectedMembers(members, context) {
         ${sorted.map((member) => `
           <span class="selected-member">
             ${escapeHtml(member)}
-            <button type="button" data-action="remove-member" data-context="${context}" data-member="${escapeHtml(member)}" title="移除">×</button>
+            <button class="selected-member-remove" type="button" data-action="remove-member" data-context="${context}" data-member="${escapeHtml(member)}" title="移除" aria-label="移除 ${escapeHtml(member)}">×</button>
           </span>
         `).join("")}
       </div>
@@ -795,7 +817,7 @@ function renderAdminMemoryItem(memory) {
       </div>
       <div class="admin-item-actions">
         <button type="button" data-action="open-edit" data-id="${escapeHtml(memory.id)}" title="编辑">${icon("edit")}</button>
-        <button type="button" data-action="delete-memory" data-id="${escapeHtml(memory.id)}" title="删除">⌫</button>
+        <button type="button" data-action="delete-memory" data-id="${escapeHtml(memory.id)}" title="删除">${icon("trash")}</button>
       </div>
     </article>
   `;
@@ -833,7 +855,7 @@ function renderEditModal() {
           </div>
         </div>
         <div class="edit-footer">
-          <button type="button" class="danger-icon" data-action="delete-memory" data-id="${escapeHtml(memory.id)}" title="删除记忆">⌫</button>
+          <button type="button" class="danger-icon" data-action="delete-memory" data-id="${escapeHtml(memory.id)}" title="删除记忆">${icon("trash")}</button>
           <div>
             <button type="button" class="secondary" data-action="close-edit">取消</button>
             <button type="button" class="save-edit" data-action="save-edit">保存修改</button>
@@ -856,7 +878,7 @@ function renderHome() {
 }
 
 function render() {
-  if (location.hash === "#admin") {
+  if (location.pathname.endsWith("/admin") || location.hash === "#admin") {
     renderAdminPage();
   } else {
     renderHome();
@@ -935,6 +957,15 @@ document.addEventListener("click", (event) => {
       state.activeMemoryId = nextMemory.id;
       render();
     }
+  }
+  if (action === "toggle-video-play") {
+    event.preventDefault();
+    if (target.paused) {
+      target.play().catch(() => {});
+    } else {
+      target.pause();
+    }
+    return;
   }
   if (action === "export-admin") {
     exportAdminCsv();

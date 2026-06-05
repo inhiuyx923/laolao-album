@@ -563,7 +563,7 @@ function renderModal() {
       <article class="modal-panel">
         <div class="modal-toolbar">
           <div class="modal-actions">
-            <a class="modal-tool" href="#admin" title="修改">${icon("edit")} 修改</a>
+            <button class="modal-tool" type="button" data-action="open-edit" data-id="${escapeHtml(memory.id)}" title="修改">${icon("edit")} 修改</button>
             <a class="modal-tool" href="${escapeHtml(memory.mediaUrl)}" download="${escapeHtml(downloadName)}" title="下载">${icon("download")} 下载</a>
           </div>
           <button class="modal-close" type="button" data-action="close-modal" title="关闭" aria-label="关闭"><span aria-hidden="true">×</span> 关闭</button>
@@ -851,6 +851,7 @@ function renderHome() {
     ${renderActiveFilters()}
     ${renderGallery()}
     ${renderModal()}
+    ${renderEditModal()}
   `;
 }
 

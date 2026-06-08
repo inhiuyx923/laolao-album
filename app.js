@@ -385,10 +385,10 @@ function renderHeader() {
     <header class="site-header">
       <div class="header-inner">
         <div class="header-top">
-          <div class="brand">
+          <button class="brand brand-scroll" type="button" data-action="scroll-top" title="回到顶部">
             <div class="brand-avatar"><img src="assets/avatar.jpeg" alt="姥姥"></div>
             <h1>时光里的温暖</h1>
-          </div>
+          </button>
           <a class="admin-link" href="admin" title="管理">
             ${icon("manage")}
             <span class="admin-text">管理</span>
@@ -914,6 +914,15 @@ document.addEventListener("click", (event) => {
   }
 
   const action = target.dataset.action;
+  if (action === "scroll-top") {
+    state.activePanel = null;
+    state.activeMemoryId = null;
+    render();
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    return;
+  }
   if (action === "toggle-panel") {
     state.activePanel = state.activePanel === target.dataset.panel ? null : target.dataset.panel;
     render();

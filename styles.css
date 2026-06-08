@@ -109,6 +109,21 @@ button {
   min-width: 0;
 }
 
+.brand-scroll {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.brand-scroll:focus-visible {
+  outline: 2px solid var(--emerald);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
 .brand-avatar {
   width: 48px;
   height: 48px;

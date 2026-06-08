@@ -30,6 +30,7 @@ const state = {
 };
 
 const app = document.querySelector("#app");
+let editBodyScrollBeforeFocus = 0;
 
 const FAMILY_MEMBERS = [
   { name: "吴树山", group: "家庭0" },
@@ -904,6 +905,9 @@ function actionTargetFromEvent(event) {
 document.addEventListener("click", (event) => {
   const target = actionTargetFromEvent(event);
   if (!target) {
+    if (event.target?.closest?.(".edit-modal, .modal-panel, .admin-shell")) {
+      return;
+    }
     state.activePanel = null;
     render();
     return;
@@ -1156,6 +1160,22 @@ document.addEventListener("input", (event) => {
   if (editField && state.admin.editDraft) {
     state.admin.editDraft[editField] = event.target.value;
   }
+});
+
+document.addEventListener("pointerdown", (event) => {
+  if (!event.target?.dataset?.editField) return;
+  const editBody = event.target.closest(".edit-body");
+  editBodyScrollBeforeFocus = editBody?.scrollTop || 0;
+}, true);
+
+document.addEventListener("focusin", (event) => {
+  if (!event.target?.dataset?.editField) return;
+  const editBody = event.target.closest(".edit-body");
+  if (!editBody) return;
+  const scrollTop = editBodyScrollBeforeFocus;
+  requestAnimationFrame(() => {
+    editBody.scrollTop = scrollTop;
+  });
 });
 
 document.addEventListener("change", (event) => {
